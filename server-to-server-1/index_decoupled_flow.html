@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayU Payment</title>
+  </head>
+  <body>
+    <h1>PayU Payment Integration</h1>
+    <form id="paymentForm">
+      <label for="txnid">Transaction ID:</label>
+      <input type="text" id="txnid" name="txnid" required /><br /><br />
+
+      <label for="amount">Amount:</label>
+      <input type="number" id="amount" name="amount" required /><br /><br />
+
+      <label for="productinfo">Product Info:</label>
+      <input
+        type="text"
+        id="productinfo"
+        name="productinfo"
+        required
+      /><br /><br />
+
+      <label for="firstname">First Name:</label>
+      <input type="text" id="firstname" name="firstname" required /><br /><br />
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required /><br /><br />
+
+      <label for="phone">Phone:</label>
+      <input type="text" id="phone" name="phone" required /><br /><br />
+
+      <label for="ccnum">Card Number:</label>
+      <input type="text" id="ccnum" name="ccnum" required /><br /><br />
+
+      <label for="ccname">Cardholder Name:</label>
+      <input type="text" id="ccname" name="ccname" required /><br /><br />
+
+      <label for="ccexpmon">Expiry Month:</label>
+      <input type="text" id="ccexpmon" name="ccexpmon" required /><br /><br />
+
+      <label for="ccexpyr">Expiry Year:</label>
+      <input type="text" id="ccexpyr" name="ccexpyr" required /><br /><br />
+
+      <label for="ccvv">CVV:</label>
+      <input type="text" id="ccvv" name="ccvv" required /><br /><br />
+
+      <button type="submit">Pay Now</button>
+    </form>
+
+    <script>
+      document
+        .getElementById("paymentForm")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const formData = new FormData(event.target);
+          const payload = {
+            txnid: formData.get("txnid"),
+            amount: formData.get("amount"),
+            productinfo: formData.get("productinfo"),
+            firstname: formData.get("firstname"),
+            email: formData.get("email"),
+            phone: formData.get("phone"),
+            cardDetails: {
+              ccnum: formData.get("ccnum"),
+              ccname: formData.get("ccname"),
+              ccexpmon: formData.get("ccexpmon"),
+              ccexpyr: formData.get("ccexpyr"),
+              ccvv: formData.get("ccvv"),
+            },
+            successUrl: "http://localhost:5000/success",
+            failureUrl: "http://localhost:5000/failure",
+            termUrl: "http://localhost:5000/callback",
+          };
+
+          try {
+            const response = await fetch(
+              "http://localhost:5000/initiate-payment",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              }
+            );
+
+            const data = await response.json();
+            console.log(data);
+            if (data.acsTemplate) {
+              // Decode the base64-encoded acsTemplate
+              const decodedHtml = atob(data.acsTemplate);
+
+              // Create a temporary div to hold the decoded HTML
+              const tempDiv = document.createElement("div");
+              tempDiv.innerHTML = decodedHtml.trim();
+
+              // Find the form within the decoded HTML
+              const form = tempDiv.querySelector("form");
+              if (form) {
+                document.body.appendChild(form); // Append form to the body
+                form.submit(); // Auto-submit the form to the 3D Secure page
+              } else {
+                console.error(
+                  "Form element not found in decoded ACS template."
+                );
+                alert(
+                  "An error occurred during redirection. Please try again."
+                );
+              }
+            } else {
+              console.error(
+                "Invalid ACS template received:",
+                data.acsTemplate
+              );
+              alert("Invalid response from the server.");
+            }
+          } catch (error) {
+            alert("Error initiating payment: " + error.message);
+          }
+        });
+    </script>
+  </body>
+</html>

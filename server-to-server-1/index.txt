@@ -1,0 +1,52 @@
+initiate payment, backend will send post request to payu, payu will give a html code like (acsTemplate), on which user will be redirected,(it is bank's page), thne This will be a call back on the URL provided by you.
+
+
+decoupled flow integration : 
+    Initiate payment request with PayU
+    Redirect the customer, after enterinh otp , it will redirect to termUrl 
+    Authorize (charge) the Payment
+    Check the response from PayU
+
+    Request Body: {
+  rawBankData: '',
+  referenceId: 'afeb00505148fe0c9a924939bdb7a8e2bbbd34bf6b8a4cada7d3125be96ff769',
+  bankData: '{"referenceId":"afeb00505148fe0c9a924939bdb7a8e2bbbd34bf6b8a4cada7d3125be96ff769","cres":"eyJtZXNzYWdlVHlwZSI6IkNSZXMiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwidGhyZWVEU1NlcnZlclRyYW5zSUQiOiI5N2E3Mzg2NS1kM2Y4LTFlZjYtYmRjNi00NDg3ZWRiYjJhMDkiLCJUcmFuc2FjdGlvbklkIjoiYzg5OWQxYWQtYmRjYi0zM2Q0LTAzOTktMzIwNzUzYTIiLCJjcmVzIjoiZXlKMGFISmxaVVJUVTJWeWRtVnlWSEpoYm5OSlJDSTZJamszWVRjek9EWTFMV1F6WmpndE1XVm1OaTFpWkdNMkxUUTBPRGRsWkdKaU1tRXdPU0lzSW1GamMxUnlZVzV6U1VRaU9pSmxOMkZqWVdReFppMDVOV1UxTFRWalpHTXRZVGt6TkMwMlptSmpNVE00TlRCak9EZ2lMQ0p0WlhOellXZGxWSGx3WlNJNklrTlNaWE1pTENKdFpYTnpZV2RsVm1WeWMybHZiaUk2SWpJdU1pNHdJaXdpWTJoaGJHeGxibWRsUTI5dGNHeGxkR2x2YmtsdVpDSTZJbGtpTENKMGNtRnVjMU4wWVhSMWN5STZJbGtpTENKbFkya2lPaUl3TWlKOSJ9","additionalInfo":{"authUdf1":"","authUdf2":"","authUdf3":"","authUdf4":"","authUdf5":"","authUdf6":"","authUdf7":"","authUdf8":"","authUdf9":"","authUdf10":""}}',
+  authenticationStatus: 'success',
+  hash: '7081e96ce9ac8409216f7e5a34f4169b51eec21797aa9cd41660bace8f1f96ea238da2d6163628ed2a514dd16b94bea029dc2bf7d32da0f761ec11d65c3ef6a4'
+}
+Parsed bankData: {
+  referenceId: 'afeb00505148fe0c9a924939bdb7a8e2bbbd34bf6b8a4cada7d3125be96ff769',
+  cres: 'eyJtZXNzYWdlVHlwZSI6IkNSZXMiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwidGhyZWVEU1NlcnZlclRyYW5zSUQiOiI5N2E3Mzg2NS1kM2Y4LTFlZjYtYmRjNi00NDg3ZWRiYjJhMDkiLCJUcmFuc2FjdGlvbklkIjoiYzg5OWQxYWQtYmRjYi0zM2Q0LTAzOTktMzIwNzUzYTIiLCJjcmVzIjoiZXlKMGFISmxaVVJUVTJWeWRtVnlWSEpoYm5OSlJDSTZJamszWVRjek9EWTFMV1F6WmpndE1XVm1OaTFpWkdNMkxUUTBPRGRsWkdKaU1tRXdPU0lzSW1GamMxUnlZVzV6U1VRaU9pSmxOMkZqWVdReFppMDVOV1UxTFRWalpHTXRZVGt6TkMwMlptSmpNVE00TlRCak9EZ2lMQ0p0WlhOellXZGxWSGx3WlNJNklrTlNaWE1pTENKdFpYTnpZV2RsVm1WeWMybHZiaUk2SWpJdU1pNHdJaXdpWTJoaGJHeGxibWRsUTI5dGNHeGxkR2x2YmtsdVpDSTZJbGtpTENKMGNtRnVjMU4wWVhSMWN5STZJbGtpTENKbFkya2lPaUl3TWlKOSJ9',
+  additionalInfo: {
+    authUdf1: '',
+    authUdf2: '',
+    authUdf3: '',
+    authUdf4: '',
+    authUdf5: '',
+    authUdf6: '',
+    authUdf7: '',
+    authUdf8: '',
+    authUdf9: '',
+    authUdf10: ''
+  }
+}
+Decoded cres2: {
+  messageType: 'CRes',
+  messageVersion: '2.2.0',
+  threeDSServerTransID: '97a73865-d3f8-1ef6-bdc6-4487edbb2a09',
+  TransactionId: 'c899d1ad-bdcb-33d4-0399-320753a2',
+  cres: 'eyJ0aHJlZURTU2VydmVyVHJhbnNJRCI6Ijk3YTczODY1LWQzZjgtMWVmNi1iZGM2LTQ0ODdlZGJiMmEwOSIsImFjc1RyYW5zSUQiOiJlN2FjYWQxZi05NWU1LTVjZGMtYTkzNC02ZmJjMTM4NTBjODgiLCJtZXNzYWdlVHlwZSI6IkNSZXMiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwiY2hhbGxlbmdlQ29tcGxldGlvbkluZCI6IlkiLCJ0cmFuc1N0YXR1cyI6IlkiLCJlY2kiOiIwMiJ9'
+}
+Decoded cres3: {
+  threeDSServerTransID: '97a73865-d3f8-1ef6-bdc6-4487edbb2a09',
+  acsTransID: 'e7acad1f-95e5-5cdc-a934-6fbc13850c88',
+  messageType: 'CRes',
+  messageVersion: '2.2.0',
+  challengeCompletionInd: 'Y',
+  transStatus: 'Y',
+  eci: '02'
+}
+Hash mismatch: {
+  expected: '7081e96ce9ac8409216f7e5a34f4169b51eec21797aa9cd41660bace8f1f96ea238da2d6163628ed2a514dd16b94bea029dc2bf7d32da0f761ec11d65c3ef6a4',
+  calculated: '0fc43d2a449f7cf4c854906bfc589c9ee5d55afd2e6b78f61558e49a9bcc09c6c3f604ae4b209d7c7b21e15def6a7a41731e0f0bc5b6d4db4b3ad5b1cd025bba'
+}
