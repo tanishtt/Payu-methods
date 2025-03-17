@@ -18,10 +18,12 @@ const Checkout = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:5000/create-payment",
+        "http://localhost:3001/create-payment",
         formData
       );
+      console.log("formdata", formData);
       const { url, paymentData } = response.data;
+      console.log("URL and payment data", url, paymentData);
 
       // Create a form dynamically to submit to PayU
       const form = document.createElement("form");
@@ -37,9 +39,9 @@ const Checkout = () => {
         form.appendChild(input);
       });
       console.log("form", form);
-      alert("h");
+      // alert("h");
       document.body.appendChild(form);
-      // form.submit();
+      form.submit();
     } catch (error) {
       console.error("Payment error:", error);
     }
