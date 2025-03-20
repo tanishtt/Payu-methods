@@ -13,6 +13,14 @@ payu_commerce_pro\frontend\node_modules
 /server-to-server-1/backend/node_modules
 /server-to-server-1/frontend/node_modules
 
+/cross-border/backend/node_modules
+/cross-border/frontend/node_modules
+
+/upi-autopay/backend/node_modules
+/upi-autopay/frontend/node_modules
+
+/subscription-card/backend/node_modules
+/subscription-card/frontend/node_modules
 payu_commerce_pro\frontend\node_modules
 
 
