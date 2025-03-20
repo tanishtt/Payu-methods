@@ -8,26 +8,51 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Replace these values with your PayU credentials
-const PAYU_KEY = "CA6cjE";
-const PAYU_SALT = "PZcsi0LUtvGm1pR775XzH2pug5QyLKW1";
+// const PAYU_KEY = "CxA6cjE";
+const PAYU_KEY = "01P17E";
+// const PAYU_SALT = "PZcsi0LUtvGm1pR775XzH2pug5QyLKW1";
+const PAYU_SALT = "bv0vKzm8vwDy6dPOnmmh1jwgU64Pm36q";
 const PAYU_TEST_URL = "https://test.payu.in/_payment";
 
 // Success and failure URLs
-const SURL = "http://localhost:5000/payment-success";
-const FURL = "http://localhost:5000/payment-failure/";
+const SURL = "http://localhost:3001/payment-success";
+const FURL = "http://localhost:3001/payment-failure/";
+
+// correct formula for calculating the value of hash:
+// sha512(key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||SALT)
 
 // Generate hash for security
 function generateHash(data) {
-  const hashString = `${PAYU_KEY}|${data.txnid}|${data.amount}|${data.productinfo}|${data.firstname}|${data.email}|||||||||||${PAYU_SALT}`;
+  // Ensure proper formatting of the input string
+  const hashString = `${PAYU_KEY}|${data.txnid}|${data.amount}|${data.productinfo}|${data.firstname}|${data.email}|${data.udf1}|${data.udf2}|${data.udf3}|${data.udf4}|${data.udf5}||||||${PAYU_SALT}`;
+
   return crypto.createHash("sha512").update(hashString).digest("hex");
 }
 
 // Endpoint to create a payment request
 app.post("/create-payment", (req, res) => {
+  console.log("hello");
   const { amount, productinfo, firstname, email, phone } = req.body;
 
-  const txnid = `txn_453311`; // Generate a unique transaction ID
-  const hash = generateHash({ txnid, amount, productinfo, firstname, email });
+  const udf1 = "planCode",
+    udf2 = "userIdXXX",
+    udf3 = "voucherId",
+    udf4 = "2,43,4",
+    udf5 = "planId";
+
+  const txnid = `txn_4568i312`; // Generate a unique transaction ID
+  const hash = generateHash({
+    txnid,
+    amount,
+    productinfo,
+    firstname,
+    email,
+    udf1,
+    udf2,
+    udf3,
+    udf4,
+    udf5,
+  });
 
   // Redirect to PayU payment page with required fields
   const paymentData = {
@@ -41,45 +66,38 @@ app.post("/create-payment", (req, res) => {
     surl: SURL,
     furl: FURL,
     hash,
-    cart_details: {
-      amount: 55000,
-      items: 2,
-      surcharges: 10,
-      pre_discount: 5,
-      sku_details: [
-        {
-          sku_id: "smartphone234",
-          sku_name: "Smartphone",
-          amount_per_sku: "45000",
-          quantity: 1,
-          offer_key: null,
-          offer_auto_apply: true,
-        },
-        {
-          sku_id: "smartwatch132",
-          sku_name: "Smartwatch",
-          amount_per_sku: "10000",
-          quantity: 1,
-          offer_key: ["flat500@2022"],
-          offer_auto_apply: false,
-        },
-      ],
-    },
+    udf1,
+    udf2,
+    udf3,
+    udf4,
+    udf5,
   };
+  console.log(paymentData);
 
   res.json({ url: PAYU_TEST_URL, paymentData });
 });
 
 const validateHash = (responseData, receivedHash) => {
-  const hashString = `${PAYU_SALT}|${responseData.status}|||||||||||${responseData.email}|${responseData.firstname}|${responseData.productinfo}|${responseData.amount}|${responseData.txnid}|${PAYU_KEY}`;
+  const hashString = `${PAYU_SALT}|${responseData.status}||||||${
+    responseData.udf5 || ""
+  }|${responseData.udf4 || ""}|${responseData.udf3 || ""}|${
+    responseData.udf2 || ""
+  }|${responseData.udf1 || ""}|${responseData.email}|${
+    responseData.firstname
+  }|${responseData.productinfo}|${responseData.amount}|${
+    responseData.txnid
+  }|${PAYU_KEY}`;
+
   const generatedHash = crypto
     .createHash("sha512")
     .update(hashString)
     .digest("hex");
+
   return generatedHash === receivedHash;
 };
 
 app.post("/payment-success", (req, res) => {
+  console.log("hi...in success");
   const responseData = req.body;
   console.log(req.body);
   // Validate the hash
@@ -99,4 +117,4 @@ app.post("/payment-failure", (req, res) => {
   return res.redirect("http://localhost:3000/failure");
 });
 
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+app.listen(3001, () => console.log("Server running on http://localhost:3001"));
